@@ -10,10 +10,10 @@ const App = () => {
   const initialBreakMaxSeconds = parseInt(Cookies.get("breakMaxSeconds")) || 5 * 60;
   const initialPhase = Cookies.get("phase") || "work"; // 追加: phaseをクッキーから取得
 
-  const [seconds, setSeconds] = useState(initialWorkMaxSeconds);
+  const [seconds, setSeconds] = useState(initialPhase === "work" ? initialWorkMaxSeconds : initialBreakMaxSeconds); // 修正: phaseに応じてsecondsの初期値を設定
   const [workMaxSeconds, setWorkMaxSeconds] = useState(initialWorkMaxSeconds);
   const [breakMaxSeconds, setBreakMaxSeconds] = useState(initialBreakMaxSeconds);
-  const [MaxSeconds, setMaxSeconds] = useState(initialWorkMaxSeconds);
+  const [MaxSeconds, setMaxSeconds] = useState(initialPhase === "work" ? initialWorkMaxSeconds : initialBreakMaxSeconds); // 修正: phaseに応じてMaxSecondsの初期値を設定
   const [phase, setPhase] = useState(initialPhase); // 修正: phaseの初期値をクッキーから取得した値に設定
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -27,6 +27,18 @@ const App = () => {
     Cookies.set("breakMaxSeconds", breakMaxSeconds, { expires: 365 });
     Cookies.set("phase", phase, { expires: 365 }); // 追加: phaseをクッキーに保存
   }, [workMaxSeconds, breakMaxSeconds, phase]); // 修正: phaseを依存関係に追加
+
+  // phaseが変更されたときにsecondsとMaxSecondsを更新
+  useEffect(() => {
+    if (phase === "work") {
+      setSeconds(workMaxSeconds);
+      setMaxSeconds(workMaxSeconds);
+    } else {
+      setSeconds(breakMaxSeconds);
+      setMaxSeconds(breakMaxSeconds);
+    }
+  }, [phase, workMaxSeconds, breakMaxSeconds]);
+
   const getPercentage = () => {
     return isDragging ? 100 : (initialWorkMaxSeconds / initialWorkMaxSeconds) * 100;
   };
