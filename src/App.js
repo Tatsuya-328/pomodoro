@@ -13,7 +13,6 @@ const App = () => {
   const [seconds, setSeconds] = useState(initialPhase === "work" ? initialWorkMaxSeconds : initialBreakMaxSeconds); // 修正: phaseに応じてsecondsの初期値を設定
   const [workMaxSeconds, setWorkMaxSeconds] = useState(initialWorkMaxSeconds);
   const [breakMaxSeconds, setBreakMaxSeconds] = useState(initialBreakMaxSeconds);
-  const [MaxSeconds, setMaxSeconds] = useState(initialPhase === "work" ? initialWorkMaxSeconds : initialBreakMaxSeconds); // 修正: phaseに応じてMaxSecondsの初期値を設定
   const [phase, setPhase] = useState(initialPhase); // 修正: phaseの初期値をクッキーから取得した値に設定
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -32,10 +31,8 @@ const App = () => {
   useEffect(() => {
     if (phase === "work") {
       setSeconds(workMaxSeconds);
-      setMaxSeconds(workMaxSeconds);
     } else {
       setSeconds(breakMaxSeconds);
-      setMaxSeconds(breakMaxSeconds);
     }
   }, [phase, workMaxSeconds, breakMaxSeconds]);
 
@@ -62,7 +59,6 @@ const App = () => {
       clearInterval(timer);
       setTimer(null);
     } else {
-      // setMaxSeconds(seconds); // 追加: タイマーを開始する前に最大秒数を現在の秒数に設定
       setTimer(
         setInterval(() => {
           setSeconds((prevSeconds) => prevSeconds - 1);
@@ -85,10 +81,8 @@ const App = () => {
   const switchPhase = (newPhase) => {
     if (newPhase === "work") {
       setSeconds(workMaxSeconds);
-      // setMaxSeconds(workMaxSeconds);
     } else {
       setSeconds(breakMaxSeconds);
-      // setMaxSeconds(breakMaxSeconds);
     }
     setPhase(newPhase);
   };
@@ -137,11 +131,9 @@ const App = () => {
     if (phase === "work") {
       setPhase("break");
       setSeconds(5 * 60);
-      // setMaxSeconds(5 * 60);
     } else {
       setPhase("work");
       setSeconds(25 * 60);
-      // setMaxSeconds(25 * 60);
       // setSessions((prevSessions) => prevSessions + 1);
     }
   }, [seconds, phase, isDragging]); // 追加: isDraggingを依存関係に追加
