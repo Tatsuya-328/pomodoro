@@ -4,10 +4,17 @@
   margin: 0;
   padding: 0;
   user-select: none;
+  font-family: system-ui;
+}
+
+html {
+  background-color: black;
 }
 
 .CircularProgressbar .CircularProgressbar-text {
   dominant-baseline: central;
+  font-size: 25px;
+  font-weight: 600;
 }
 
 .container {
@@ -17,9 +24,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #181818;
+  background-color: black;
   color: white;
-  font-family: "Roboto", sans-serif;
 }
 
 h1 {
@@ -28,9 +34,10 @@ h1 {
 }
 
 .timer {
-  width: 300px;
-  height: 300px;
+  width: 200px;
+  height: 200px;
   position: relative;
+  transition: opacity 0.3s ease;
 }
 
 .phase {
@@ -38,27 +45,29 @@ h1 {
   bottom: 10%;
   left: 50%;
   /* transform: translateX(-50%); */
-  font-size: 1.5rem;
+  /* font-size: 1.5rem; */
   font-weight: bold;
+  font-size: 17px;
+  margin: 0 4px;
 }
 
 .buttons {
   display: flex;
-  margin-top: 2rem;
+  margin-top: 15px;
 }
 
 button {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: auto;
   border: none;
   border-radius: 50%;
   background-color: unset;
   color: white;
   font-size: 2rem;
-  border: 1px solid;
-  margin: 0 1rem;
+  /* border: 1px solid; */
+  margin: 0 5px;
   cursor: pointer;
-  opacity: 0.9;
+  opacity: 0.7;
   transition: opacity 0.3s ease;
 }
 
@@ -75,7 +84,8 @@ button:hover {
 .phase-selector {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
+  /* margin-top: 20px; */
+  opacity: 0.7;
 }
 
 .phase {
@@ -103,3 +113,7 @@ button:hover {
     opacity: 0.6;
   }
 } */
+
+.bi-arrow-clockwise {
+  padding-top: 5px;
+}

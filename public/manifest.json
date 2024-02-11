@@ -1,10 +1,21 @@
 {
+  "short_name": "Pomodoro",
   "name": "Pomodoro",
   "icons": [
     {
-      "src": "clock2.ico",
+      "src": "icons8-clock-48.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "icons8-clock-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icons8-clock-420.png",
+      "type": "image/png",
+      "sizes": "480x480"
     }
   ],
   "start_url": ".",

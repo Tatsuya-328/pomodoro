@@ -37,15 +37,16 @@ const App = () => {
   }, [phase, workMaxSeconds, breakMaxSeconds]);
 
   const getPercentage = () => {
-    return isDragging ? 100 : (initialWorkMaxSeconds / initialWorkMaxSeconds) * 100;
+    return isDragging ? 100 : (seconds / (phase === "work" ? workMaxSeconds : breakMaxSeconds)) * 100;
   };
 
   const getColor = () => {
-    return "#3591c1";
+    // return "#2da7ff";
+    return "rgb(30 103 157)";
     // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
   const getTextColor = () => {
-    return isDragging ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 1)"; // 数字の色を薄くする
+    return isDragging ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.7)"; // 数字の色を薄くする
   };
 
   const formatTime = () => {
@@ -97,16 +98,9 @@ const App = () => {
   };
 
   const handleMouseUp = () => {
-    console.log(seconds);
+    // console.log(seconds);
     if (timer) return;
     setIsDragging(false);
-    if (phase === "work") {
-      setSeconds(seconds); // 追加: "WORK"の値を更新
-      setWorkMaxSeconds(seconds);
-    } else {
-      setSeconds(seconds); // 追加: "BREAK"の値を更新
-      setBreakMaxSeconds(seconds);
-    }
   };
 
   const handleMouseMove = (e) => {
@@ -114,10 +108,21 @@ const App = () => {
       const deltaY = e.clientY - containerRef.current.getBoundingClientRect().top;
       const diffHoge = dragStartValueWhere - Math.floor(deltaY / 6) * 60;
       let newValue = dragStartValueSeconds + diffHoge;
+      if (deltaY <= 30 || deltaY >= window.innerHeight - 30 || e.clientX <= 30 || e.clientX >= window.innerWidth - 30) {
+        setIsDragging(false);
+        return;
+      }
       if (newValue <= 0) {
         newValue = 60;
       }
       changeSeconds(newValue);
+      if (phase === "work") {
+        setSeconds(newValue); // 追加: "WORK"の値を更新
+        setWorkMaxSeconds(newValue);
+      } else {
+        setSeconds(newValue); // 追加: "BREAK"の値を更新
+        setBreakMaxSeconds(newValue);
+      }
     }
   };
 
@@ -140,6 +145,36 @@ const App = () => {
 
   return (
     <div className="container" onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} ref={containerRef}>
+      <div className="timer" style={{ cursor: timer ? "default" : "ns-resize" }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
+        <CircularProgressbar
+          value={getPercentage()}
+          text={formatTime()}
+          styles={buildStyles({
+            pathColor: getColor(),
+            textColor: getTextColor(), // 追加: textColorを動的に設定
+            trailColor: "rgba(30,103,157,0.3)",
+          })}
+        />
+      </div>
+      <div className="buttons">
+        <button onMouseUp={(e) => e.stopPropagation()} onClick={resetTimer}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="35" height="60" fill="currentColor" className="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+            <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
+          </svg>
+        </button>
+        <button onMouseUp={(e) => e.stopPropagation()} onClick={toggleTimer}>
+          {timer ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="60" fill="currentColor" className="bi bi-pause" viewBox="0 0 16 16">
+              <path d="M6 3.5a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5m4 0a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="40" fill="currentColor" className="bi bi-caret-right" viewBox="0 0 16 16">
+              <path d="M6 12.796V3.204L11.481 8zm.659.753 5.48-4.796a1 1 0 0 0 0-1.506L6.66 2.451C6.011 1.885 5 2.345 5 3.204v9.592a1 1 0 0 0 1.659.753" />
+            </svg>
+          )}
+        </button>
+      </div>
       <div className="phase-selector">
         <div
           className={`phase ${phase === "work" ? "active" : ""}`}
@@ -151,7 +186,7 @@ const App = () => {
             }
           }}
         >
-          WORK
+          FOCUS
         </div>
         <div
           className={`phase ${phase === "break" ? "active" : ""}`}
@@ -166,25 +201,6 @@ const App = () => {
           {/* 追加: "BREAK"の値をリセット */}
           BREAK
         </div>
-      </div>
-      <div className="timer" style={{ cursor: timer ? "default" : "ns-resize" }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
-        <CircularProgressbar
-          value={getPercentage()}
-          text={formatTime()}
-          styles={buildStyles({
-            pathColor: getColor(),
-            textColor: getTextColor(), // 追加: textColorを動的に設定
-            trailColor: "rgba(53, 145, 193, 0.2)", // 背景色を追加
-          })}
-        />
-      </div>
-      <div className="buttons">
-        <button onMouseUp={(e) => e.stopPropagation()} onClick={toggleTimer}>
-          {timer ? "❚❚" : "►"}
-        </button>
-        <button onMouseUp={(e) => e.stopPropagation()} onClick={resetTimer}>
-          ↻
-        </button>
       </div>
     </div>
   );
