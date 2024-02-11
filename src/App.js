@@ -7,10 +7,10 @@ const App = () => {
   const [seconds, setSeconds] = useState(25 * 60);
   const [maxSeconds, setMaxSeconds] = useState(25 * 60);
   const [phase, setPhase] = useState("work");
-  const [sessions, setSessions] = useState(0);
+  // const [sessions, setSessions] = useState(0);
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStartValue, setDragStartValue] = useState(0);
+  // const [dragStartValue, setDragStartValue] = useState(0);
   const [dragStartValueWhere, setDragStartValueWhere] = useState(0);
   const [dragStartValueSeconds, setDragStartValueSeconds] = useState(0);
   const containerRef = useRef(null);
@@ -20,8 +20,6 @@ const App = () => {
   };
 
   const getColor = () => {
-    sessions;
-    dragStartValue;
     return "#3591c1";
     // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
@@ -55,14 +53,14 @@ const App = () => {
     setSeconds(25 * 60);
     setMaxSeconds(25 * 60);
     setPhase("work");
-    setSessions(0);
+    // setSessions(0);
   };
 
   const handleMouseDown = (e) => {
     if (timer) return;
     setIsDragging(true);
     const deltaY = e.clientY - containerRef.current.getBoundingClientRect().top;
-    setDragStartValue(seconds - Math.floor(deltaY / 6));
+    // setDragStartValue(seconds - Math.floor(deltaY / 6));
     setDragStartValueSeconds(Math.floor(seconds / 60) * 60);
     setDragStartValueWhere(Math.floor(deltaY / 6) * 60);
   };
@@ -100,7 +98,7 @@ const App = () => {
       setPhase("work");
       setSeconds(25 * 60);
       setMaxSeconds(25 * 60);
-      setSessions((prevSessions) => prevSessions + 1);
+      // setSessions((prevSessions) => prevSessions + 1);
     }
   }, [seconds, phase, isDragging]); // 追加: isDraggingを依存関係に追加
 
