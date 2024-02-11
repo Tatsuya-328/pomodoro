@@ -9,7 +9,6 @@ const App = () => {
   const [sessions, setSessions] = useState(0);
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStartValue, setDragStartValue] = useState(0);
   const [dragStartValueWhere, setDragStartValueWhere] = useState(0);
   const [dragStartValueSeconds, setDragStartValueSeconds] = useState(0);
   const containerRef = useRef(null);
@@ -44,19 +43,17 @@ const App = () => {
     return `${minutes < 10 ? "0" + minutes : minutes}:${secondsLeft < 10 ? "0" + secondsLeft : secondsLeft}`;
   };
 
-  const startTimer = () => {
-    if (timer) return;
-    setTimer(
-      setInterval(() => {
-        setSeconds((prevSeconds) => prevSeconds - 1);
-      }, 1000)
-    );
-  };
-
-  const pauseTimer = () => {
-    if (!timer) return;
-    clearInterval(timer);
-    setTimer(null);
+  const toggleTimer = () => {
+    if (timer) {
+      clearInterval(timer);
+      setTimer(null);
+    } else {
+      setTimer(
+        setInterval(() => {
+          setSeconds((prevSeconds) => prevSeconds - 1);
+        }, 1000)
+      );
+    }
   };
 
   const resetTimer = () => {
@@ -70,7 +67,6 @@ const App = () => {
   const handleMouseDown = (e) => {
     setIsDragging(true);
     const deltaY = e.clientY - containerRef.current.getBoundingClientRect().top;
-    setDragStartValue(seconds - Math.floor(deltaY / 60));
     setDragStartValueSeconds(Math.floor(seconds / 60) * 60);
     setDragStartValueWhere(Math.floor(deltaY / 60) * 60);
   };
@@ -82,7 +78,6 @@ const App = () => {
   const handleMouseMove = (e) => {
     if (isDragging) {
       const deltaY = e.clientY - containerRef.current.getBoundingClientRect().top;
-      const hoge = Math.floor(deltaY / 60) * 60;
       const diffHoge = dragStartValueWhere - Math.floor(deltaY / 60) * 60;
       const newValue = dragStartValueSeconds + diffHoge;
       console.log(dragStartValueSeconds, diffHoge);
@@ -124,8 +119,7 @@ const App = () => {
         <div className="phase">{getText()}</div>
       </div>
       <div className="buttons">
-        <button onClick={startTimer}>►</button>
-        <button onClick={pauseTimer}>❚❚</button>
+        <button onClick={toggleTimer}>{timer ? "❚❚" : "►"}</button>
         <button onClick={resetTimer}>↻</button>
       </div>
       <div className="sessions">{sessions} of 2 sessions</div>
