@@ -5,36 +5,26 @@ import "./App.css";
 
 const App = () => {
   const [seconds, setSeconds] = useState(25 * 60);
+  const [maxSeconds, setMaxSeconds] = useState(25 * 60);
   const [phase, setPhase] = useState("work");
   const [sessions, setSessions] = useState(0);
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragStartValue, setDragStartValue] = useState(0);
   const [dragStartValueWhere, setDragStartValueWhere] = useState(0);
   const [dragStartValueSeconds, setDragStartValueSeconds] = useState(0);
   const containerRef = useRef(null);
 
   const getPercentage = () => {
-    if (phase === "work") {
-      return (seconds / (25 * 60)) * 100;
-    } else {
-      return (seconds / (5 * 60)) * 100;
-    }
+    return isDragging ? 100 : (seconds / maxSeconds) * 100;
   };
 
   const getColor = () => {
-    if (phase === "work") {
-      return "#f87070";
-    } else {
-      return "#70f3f8";
-    }
+    return "#3591c1";
+    // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
-
-  const getText = () => {
-    if (phase === "work") {
-      return "WORK";
-    } else {
-      return "BREAK";
-    }
+  const getTextColor = () => {
+    return isDragging ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 1)"; // 数字の色を薄くする
   };
 
   const formatTime = () => {
@@ -48,6 +38,7 @@ const App = () => {
       clearInterval(timer);
       setTimer(null);
     } else {
+      setMaxSeconds(seconds); // 追加: タイマーを開始する前に最大秒数を現在の秒数に設定
       setTimer(
         setInterval(() => {
           setSeconds((prevSeconds) => prevSeconds - 1);
@@ -60,27 +51,34 @@ const App = () => {
     clearInterval(timer);
     setTimer(null);
     setSeconds(25 * 60);
+    setMaxSeconds(25 * 60);
     setPhase("work");
     setSessions(0);
   };
 
   const handleMouseDown = (e) => {
+    if (timer) return;
     setIsDragging(true);
     const deltaY = e.clientY - containerRef.current.getBoundingClientRect().top;
+    setDragStartValue(seconds - Math.floor(deltaY / 6));
     setDragStartValueSeconds(Math.floor(seconds / 60) * 60);
-    setDragStartValueWhere(Math.floor(deltaY / 60) * 60);
+    setDragStartValueWhere(Math.floor(deltaY / 6) * 60);
   };
 
   const handleMouseUp = () => {
+    if (timer) return;
     setIsDragging(false);
+    setMaxSeconds(seconds);
   };
 
   const handleMouseMove = (e) => {
     if (isDragging) {
       const deltaY = e.clientY - containerRef.current.getBoundingClientRect().top;
-      const diffHoge = dragStartValueWhere - Math.floor(deltaY / 60) * 60;
-      const newValue = dragStartValueSeconds + diffHoge;
-      console.log(dragStartValueSeconds, diffHoge);
+      const diffHoge = dragStartValueWhere - Math.floor(deltaY / 6) * 60;
+      let newValue = dragStartValueSeconds + diffHoge;
+      if (newValue <= 0) {
+        newValue = 60;
+      }
       changeSeconds(newValue);
     }
   };
@@ -91,38 +89,54 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (seconds === 0) {
-      if (phase === "work") {
-        setPhase("break");
-        setSeconds(5 * 60);
-      } else {
-        setPhase("work");
-        setSeconds(25 * 60);
-        setSessions((prevSessions) => prevSessions + 1);
-      }
+    if (seconds > 0 || isDragging) return; // 追加: ドラッグ中は何もしない
+    if (phase === "work") {
+      setPhase("break");
+      setSeconds(5 * 60);
+      setMaxSeconds(5 * 60);
+    } else {
+      setPhase("work");
+      setSeconds(25 * 60);
+      setMaxSeconds(25 * 60);
+      setSessions((prevSessions) => prevSessions + 1);
     }
-  }, [seconds, phase]);
+  }, [seconds, phase, isDragging]); // 追加: isDraggingを依存関係に追加
 
   return (
     <div className="container" onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} ref={containerRef}>
-      <h1>Pomodoro Timer</h1>
-      <div className="timer" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
+      <div className="phase-selector">
+        <div
+          className={`phase ${phase === "work" ? "active" : ""}`}
+          onClick={() => {
+            if (!timer) setPhase("work");
+          }}
+        >
+          WORK
+        </div>
+        <div
+          className={`phase ${phase === "break" ? "active" : ""}`}
+          onClick={() => {
+            if (!timer) setPhase("break");
+          }}
+        >
+          BREAK
+        </div>
+      </div>
+      <div className="timer" style={{ cursor: timer ? "default" : "ns-resize" }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
         <CircularProgressbar
           value={getPercentage()}
           text={formatTime()}
           styles={buildStyles({
             pathColor: getColor(),
-            textColor: "white",
-            trailColor: "transparent",
+            textColor: getTextColor(), // 追加: textColorを動的に設定
+            trailColor: "rgba(53, 145, 193, 0.2)", // 背景色を追加
           })}
         />
-        <div className="phase">{getText()}</div>
       </div>
       <div className="buttons">
         <button onClick={toggleTimer}>{timer ? "❚❚" : "►"}</button>
         <button onClick={resetTimer}>↻</button>
       </div>
-      <div className="sessions">{sessions} of 2 sessions</div>
     </div>
   );
 };

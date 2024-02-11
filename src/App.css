@@ -6,6 +6,10 @@
   user-select: none;
 }
 
+.CircularProgressbar .CircularProgressbar-text {
+  dominant-baseline: central;
+}
+
 .container {
   width: 100vw;
   height: 100vh;
@@ -30,10 +34,10 @@ h1 {
 }
 
 .phase {
-  position: absolute;
+  /* position: absolute; */
   bottom: 10%;
   left: 50%;
-  transform: translateX(-50%);
+  /* transform: translateX(-50%); */
   font-size: 1.5rem;
   font-weight: bold;
 }
@@ -58,4 +62,21 @@ button {
 .sessions {
   margin-top: 2rem;
   font-size: 1.2rem;
+}
+
+.phase-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.phase {
+  margin: 0 10px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.phase.active {
+  opacity: 1;
 }
