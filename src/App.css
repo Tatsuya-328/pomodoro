@@ -114,3 +114,7 @@ button:hover {
 .bi-arrow-clockwise {
   padding-top: 5px;
 }
+
+.CircularProgressbar .CircularProgressbar-path {
+  stroke-linecap: butt
+}
