@@ -2,21 +2,33 @@ import React, { useState, useEffect, useRef } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import "./App.css";
+import Cookies from "js-cookie"; // js-cookie ライブラリをインポート
 
 const App = () => {
-  const [seconds, setSeconds] = useState(25 * 60);
-  const [maxSeconds, setMaxSeconds] = useState(25 * 60);
-  const [phase, setPhase] = useState("work");
-  // const [sessions, setSessions] = useState(0);
+  // クッキーから値を取得し、存在しない場合はデフォルト値を設定
+  const initialWorkMaxSeconds = parseInt(Cookies.get("workMaxSeconds")) || 25 * 60;
+  const initialBreakMaxSeconds = parseInt(Cookies.get("breakMaxSeconds")) || 5 * 60;
+  const initialPhase = Cookies.get("phase") || "work"; // 追加: phaseをクッキーから取得
+
+  const [seconds, setSeconds] = useState(initialWorkMaxSeconds);
+  const [workMaxSeconds, setWorkMaxSeconds] = useState(initialWorkMaxSeconds);
+  const [breakMaxSeconds, setBreakMaxSeconds] = useState(initialBreakMaxSeconds);
+  const [MaxSeconds, setMaxSeconds] = useState(initialWorkMaxSeconds);
+  const [phase, setPhase] = useState(initialPhase); // 修正: phaseの初期値をクッキーから取得した値に設定
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  // const [dragStartValue, setDragStartValue] = useState(0);
   const [dragStartValueWhere, setDragStartValueWhere] = useState(0);
   const [dragStartValueSeconds, setDragStartValueSeconds] = useState(0);
   const containerRef = useRef(null);
 
+  // workMaxSecondsとbreakMaxSecondsが変更されたときにクッキーを更新
+  useEffect(() => {
+    Cookies.set("workMaxSeconds", workMaxSeconds, { expires: 365 });
+    Cookies.set("breakMaxSeconds", breakMaxSeconds, { expires: 365 });
+    Cookies.set("phase", phase, { expires: 365 }); // 追加: phaseをクッキーに保存
+  }, [workMaxSeconds, breakMaxSeconds, phase]); // 修正: phaseを依存関係に追加
   const getPercentage = () => {
-    return isDragging ? 100 : (seconds / maxSeconds) * 100;
+    return isDragging ? 100 : (initialWorkMaxSeconds / initialWorkMaxSeconds) * 100;
   };
 
   const getColor = () => {
@@ -24,7 +36,7 @@ const App = () => {
     // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
   const getTextColor = () => {
-    return isDragging ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 1)"; // 数字の色を薄くする
+    return isDragging ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 1)"; // 数字の色を薄くする
   };
 
   const formatTime = () => {
@@ -38,7 +50,7 @@ const App = () => {
       clearInterval(timer);
       setTimer(null);
     } else {
-      setMaxSeconds(seconds); // 追加: タイマーを開始する前に最大秒数を現在の秒数に設定
+      // setMaxSeconds(seconds); // 追加: タイマーを開始する前に最大秒数を現在の秒数に設定
       setTimer(
         setInterval(() => {
           setSeconds((prevSeconds) => prevSeconds - 1);
@@ -50,10 +62,23 @@ const App = () => {
   const resetTimer = () => {
     clearInterval(timer);
     setTimer(null);
-    setSeconds(25 * 60);
-    setMaxSeconds(25 * 60);
-    setPhase("work");
+    if (phase === "work") {
+      setSeconds(workMaxSeconds);
+    } else {
+      setSeconds(breakMaxSeconds);
+    }
     // setSessions(0);
+  };
+
+  const switchPhase = (newPhase) => {
+    if (newPhase === "work") {
+      setSeconds(workMaxSeconds);
+      // setMaxSeconds(workMaxSeconds);
+    } else {
+      setSeconds(breakMaxSeconds);
+      // setMaxSeconds(breakMaxSeconds);
+    }
+    setPhase(newPhase);
   };
 
   const handleMouseDown = (e) => {
@@ -66,9 +91,16 @@ const App = () => {
   };
 
   const handleMouseUp = () => {
+    console.log(seconds);
     if (timer) return;
     setIsDragging(false);
-    setMaxSeconds(seconds);
+    if (phase === "work") {
+      setSeconds(seconds); // 追加: "WORK"の値を更新
+      setWorkMaxSeconds(seconds);
+    } else {
+      setSeconds(seconds); // 追加: "BREAK"の値を更新
+      setBreakMaxSeconds(seconds);
+    }
   };
 
   const handleMouseMove = (e) => {
@@ -93,11 +125,11 @@ const App = () => {
     if (phase === "work") {
       setPhase("break");
       setSeconds(5 * 60);
-      setMaxSeconds(5 * 60);
+      // setMaxSeconds(5 * 60);
     } else {
       setPhase("work");
       setSeconds(25 * 60);
-      setMaxSeconds(25 * 60);
+      // setMaxSeconds(25 * 60);
       // setSessions((prevSessions) => prevSessions + 1);
     }
   }, [seconds, phase, isDragging]); // 追加: isDraggingを依存関係に追加
@@ -107,18 +139,27 @@ const App = () => {
       <div className="phase-selector">
         <div
           className={`phase ${phase === "work" ? "active" : ""}`}
+          onMouseUp={(e) => e.stopPropagation()}
           onClick={() => {
-            if (!timer) setPhase("work");
+            if (!timer) {
+              setSeconds(25 * 60);
+              switchPhase("work");
+            }
           }}
         >
           WORK
         </div>
         <div
           className={`phase ${phase === "break" ? "active" : ""}`}
+          onMouseUp={(e) => e.stopPropagation()}
           onClick={() => {
-            if (!timer) setPhase("break");
+            if (!timer) {
+              switchPhase("break");
+            }
           }}
         >
+          {" "}
+          {/* 追加: "BREAK"の値をリセット */}
           BREAK
         </div>
       </div>
@@ -134,8 +175,12 @@ const App = () => {
         />
       </div>
       <div className="buttons">
-        <button onClick={toggleTimer}>{timer ? "❚❚" : "►"}</button>
-        <button onClick={resetTimer}>↻</button>
+        <button onMouseUp={(e) => e.stopPropagation()} onClick={toggleTimer}>
+          {timer ? "❚❚" : "►"}
+        </button>
+        <button onMouseUp={(e) => e.stopPropagation()} onClick={resetTimer}>
+          ↻
+        </button>
       </div>
     </div>
   );

@@ -52,12 +52,20 @@ button {
   height: 50px;
   border: none;
   border-radius: 50%;
-  background-color: white;
-  color: #181818;
+  background-color: unset;
+  color: white;
   font-size: 2rem;
+  border: 1px solid;
   margin: 0 1rem;
   cursor: pointer;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
 }
+
+button:hover {
+  opacity: 0.7;
+}
+
 
 .sessions {
   margin-top: 2rem;
@@ -77,6 +85,21 @@ button {
   transition: opacity 0.3s ease;
 }
 
+.phase:hover {
+  opacity: 0.6;
+}
+
 .phase.active {
   opacity: 1;
 }
+
+.CircularProgressbar-text {
+  transition: opacity 0.3s ease;
+}
+
+/* .CircularProgressbar:active,
+.CircularProgressbar:hover {
+  .CircularProgressbar-text {
+    opacity: 0.6;
+  }
+} */
