@@ -7,10 +7,10 @@ const App = () => {
   const [seconds, setSeconds] = useState(25 * 60);
   const [maxSeconds, setMaxSeconds] = useState(25 * 60);
   const [phase, setPhase] = useState("work");
-  // const [sessions, setSessions] = useState(0);
+  const [sessions, setSessions] = useState(0);
   const [timer, setTimer] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  // const [dragStartValue, setDragStartValue] = useState(0);
+  const [dragStartValue, setDragStartValue] = useState(0);
   const [dragStartValueWhere, setDragStartValueWhere] = useState(0);
   const [dragStartValueSeconds, setDragStartValueSeconds] = useState(0);
   const containerRef = useRef(null);
@@ -20,6 +20,8 @@ const App = () => {
   };
 
   const getColor = () => {
+    sessions;
+    dragStartValue;
     return "#3591c1";
     // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
