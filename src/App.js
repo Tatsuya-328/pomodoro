@@ -55,15 +55,17 @@ const App = () => {
 
   const playSound = () => {
     if (isSoundOn) {
-      const audio = new Audio(audio1);
+      const audio = new Audio(audio1); // 音声ファイルのURLを指定
       audio.play();
     }
   };
+
   useEffect(() => {
-    if (seconds === 0 && isSoundOn) {
+    if (seconds === 0) {
       playSound();
     }
   }, [seconds, isSoundOn]);
+
   const getPercentage = () => {
     return isDragging ? 100 : (seconds / (phase === "work" ? workMaxSeconds : breakMaxSeconds)) * 100;
   };
