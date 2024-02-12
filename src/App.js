@@ -111,6 +111,7 @@ const App = () => {
   const resetTimer = () => {
     clearInterval(timer);
     setTimer(null);
+    setIsTimerRunning(true);
     if (phase === "work") {
       setSeconds(workMaxSeconds);
     } else {
