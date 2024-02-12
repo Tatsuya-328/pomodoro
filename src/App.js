@@ -9,6 +9,7 @@ const App = () => {
   const initialWorkMaxSeconds = parseInt(Cookies.get("workMaxSeconds")) || 25 * 60;
   const initialBreakMaxSeconds = parseInt(Cookies.get("breakMaxSeconds")) || 5 * 60;
   const initialPhase = Cookies.get("phase") || "work"; // 追加: phaseをクッキーから取得
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
 
   const [seconds, setSeconds] = useState(initialPhase === "work" ? initialWorkMaxSeconds : initialBreakMaxSeconds); // 修正: phaseに応じてsecondsの初期値を設定
   const [workMaxSeconds, setWorkMaxSeconds] = useState(initialWorkMaxSeconds);
@@ -19,6 +20,17 @@ const App = () => {
   const [dragStartValueWhere, setDragStartValueWhere] = useState(0);
   const [dragStartValueSeconds, setDragStartValueSeconds] = useState(0);
   const containerRef = useRef(null);
+  const initialOpacity = parseFloat(Cookies.get("opacity")) || 1;
+
+  const [opacity, setOpacity] = useState(initialOpacity);
+
+  const handleOpacityChange = (event) => {
+    setOpacity(event.target.value);
+  };
+
+  useEffect(() => {
+    Cookies.set("opacity", opacity, { expires: 365 });
+  }, [opacity]);
 
   // workMaxSecondsとbreakMaxSecondsが変更されたときにクッキーを更新
   useEffect(() => {
@@ -42,31 +54,41 @@ const App = () => {
 
   const getColor = () => {
     // return "#2da7ff";
-    return "rgb(30 103 157)";
+    return "rgb(36 107 160)";
     // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
   const getTextColor = () => {
-    return isDragging ? "rgba(255, 255, 255, 0.6)" : "rgba(255, 255, 255, 0.7)"; // 数字の色を薄くする
+    return isDragging ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.9)"; // 数字の色を薄くする
   };
 
   const formatTime = () => {
-    const minutes = Math.floor(seconds / 60);
-    const secondsLeft = seconds % 60;
-    return `${minutes < 10 ? "0" + minutes : minutes}:${secondsLeft < 10 ? "0" + secondsLeft : secondsLeft}`;
+    const minutes = Math.floor(Math.abs(seconds) / 60);
+    const secondsLeft = Math.abs(seconds) % 60;
+    return `${seconds < 0 ? "-" : ""}${minutes < 10 ? "0" + minutes : minutes}:${secondsLeft < 10 ? "0" + secondsLeft : secondsLeft}`;
   };
 
   const toggleTimer = () => {
     if (timer) {
       clearInterval(timer);
       setTimer(null);
+      setIsTimerRunning(false);
     } else {
       setTimer(
         setInterval(() => {
           setSeconds((prevSeconds) => prevSeconds - 1);
         }, 1000)
       );
+      setIsTimerRunning(true);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [timer]);
 
   const resetTimer = () => {
     clearInterval(timer);
@@ -132,31 +154,36 @@ const App = () => {
   };
 
   useEffect(() => {
-    if (seconds > 0 || isDragging) return; // 追加: ドラッグ中は何もしない
-    if (phase === "work") {
-      setPhase("break");
-      setSeconds(5 * 60);
-    } else {
-      setPhase("work");
-      setSeconds(25 * 60);
-      // setSessions((prevSessions) => prevSessions + 1);
+    if (isDragging) return;
+    if (seconds === 0) {
+      setTimer(
+        setInterval(() => {
+          setSeconds((prevSeconds) => prevSeconds - 1);
+        }, 1000)
+      );
     }
-  }, [seconds, phase, isDragging]); // 追加: isDraggingを依存関係に追加
+  }, [seconds, phase, isDragging]);
 
   return (
-    <div className="container" onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} ref={containerRef}>
+    <div className="container" style={{ opacity: opacity }} onMouseUp={handleMouseUp} onMouseMove={handleMouseMove} ref={containerRef}>
       <div className="timer" style={{ cursor: timer ? "default" : "ns-resize" }} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove}>
         <CircularProgressbar
           value={getPercentage()}
           text={formatTime()}
           styles={buildStyles({
             pathColor: getColor(),
-            textColor: getTextColor(), // 追加: textColorを動的に設定
-            trailColor: "rgba(30,103,157,0.3)",
+            textColor: getTextColor(),
+            trailColor: "rgba(36, 107, 160, 0.6)",
           })}
         />
       </div>
       <div className="buttons">
+        <label htmlFor="brightness-slider">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="50" fill="currentColor" class="bi bi-brightness-low" viewBox="0 0 16 16">
+            <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8m.5-9.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m0 11a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0m5-5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m-11 0a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1m9.743-4.036a.5.5 0 1 1-.707-.707.5.5 0 0 1 .707.707m-7.779 7.779a.5.5 0 1 1-.707-.707.5.5 0 0 1 .707.707m7.072 0a.5.5 0 1 1 .707-.707.5.5 0 0 1-.707.707M3.757 4.464a.5.5 0 1 1 .707-.707.5.5 0 0 1-.707.707" />
+          </svg>
+        </label>
+        <input id="brightness-slider" type="range" min="0.2" max="1" step="0.1" value={opacity} onChange={handleOpacityChange} />{" "}
         <button onMouseUp={(e) => e.stopPropagation()} onClick={resetTimer}>
           <svg xmlns="http://www.w3.org/2000/svg" width="35" height="60" fill="currentColor" className="bi bi-arrow-clockwise" viewBox="0 0 16 16">
             <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
@@ -177,7 +204,7 @@ const App = () => {
       </div>
       <div className="phase-selector">
         <div
-          className={`phase ${phase === "work" ? "active" : ""}`}
+          className={`phase ${phase === "work" ? "active" : ""} ${isTimerRunning ? "disabled" : ""} `}
           onMouseUp={(e) => e.stopPropagation()}
           onClick={() => {
             if (!timer) {
@@ -189,7 +216,7 @@ const App = () => {
           FOCUS
         </div>
         <div
-          className={`phase ${phase === "break" ? "active" : ""}`}
+          className={`phase ${phase === "break" ? "active" : ""} ${isTimerRunning ? "disabled" : ""}`}
           onMouseUp={(e) => e.stopPropagation()}
           onClick={() => {
             if (!timer) {
@@ -197,8 +224,6 @@ const App = () => {
             }
           }}
         >
-          {" "}
-          {/* 追加: "BREAK"の値をリセット */}
           BREAK
         </div>
       </div>
