@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import "./App.css";
@@ -53,18 +53,18 @@ const App = () => {
     }
   }, [phase, workMaxSeconds, breakMaxSeconds]);
 
-  const playSound = () => {
+  const playSound = useCallback(() => {
     if (isSoundOn) {
       const audio = new Audio(audio1); // 音声ファイルのURLを指定
       audio.play();
     }
-  };
+  }, [isSoundOn]);
 
   useEffect(() => {
     if (seconds === 0) {
       playSound();
     }
-  }, [seconds, isSoundOn]);
+  }, [seconds, playSound]);
 
   const getPercentage = () => {
     return isDragging ? 100 : (seconds / (phase === "work" ? workMaxSeconds : breakMaxSeconds)) * 100;
