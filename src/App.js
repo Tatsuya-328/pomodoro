@@ -10,7 +10,8 @@ const App = () => {
   const initialBreakMaxSeconds = parseInt(Cookies.get("breakMaxSeconds")) || 5 * 60;
   const initialPhase = Cookies.get("phase") || "work"; // 追加: phaseをクッキーから取得
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [isSoundOn, setIsSoundOn] = useState(true);
+  const initialIsSoundOn = Cookies.get("isSoundOn") === "true";
+  const [isSoundOn, setIsSoundOn] = useState(initialIsSoundOn);
 
   const [seconds, setSeconds] = useState(initialPhase === "work" ? initialWorkMaxSeconds : initialBreakMaxSeconds); // 修正: phaseに応じてsecondsの初期値を設定
   const [workMaxSeconds, setWorkMaxSeconds] = useState(initialWorkMaxSeconds);
@@ -26,9 +27,14 @@ const App = () => {
   const [opacity, setOpacity] = useState(initialOpacity);
 
   const toggleSound = () => {
-    setIsSoundOn(!isSoundOn);
+    const newIsSoundOn = !isSoundOn;
+    setIsSoundOn(newIsSoundOn);
+    Cookies.set("isSoundOn", newIsSoundOn, { expires: Infinity });
   };
 
+  useEffect(() => {
+    Cookies.set("isSoundOn", isSoundOn, { expires: 365 });
+  }, [isSoundOn]);
   const handleOpacityChange = (event) => {
     setOpacity(event.target.value);
   };
@@ -72,7 +78,7 @@ const App = () => {
 
   const getColor = () => {
     // return "#2da7ff";
-    return "rgb(36 107 160)";
+    return "rgb(2 127 219)";
     // return isDragging ? "rgba(53, 145, 193, 0.5)" : "rgba(53, 145, 193, 1)"; // 進行状況の色を薄くする
   };
   const getTextColor = () => {
@@ -192,7 +198,7 @@ const App = () => {
           styles={buildStyles({
             pathColor: getColor(),
             textColor: getTextColor(),
-            trailColor: "rgba(36, 107, 160, 0.6)",
+            trailColor: "rgba(2, 127, 219,0.4)",
           })}
         />
       </div>
