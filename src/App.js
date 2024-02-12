@@ -60,11 +60,10 @@ const App = () => {
     }
   };
   useEffect(() => {
-    if (seconds === 0) {
+    if (seconds === 0 && isSoundOn) {
       playSound();
     }
   }, [seconds, isSoundOn]);
-
   const getPercentage = () => {
     return isDragging ? 100 : (seconds / (phase === "work" ? workMaxSeconds : breakMaxSeconds)) * 100;
   };
