@@ -53,17 +53,17 @@ const App = () => {
     }
   }, [phase, workMaxSeconds, breakMaxSeconds]);
 
+  const playSound = () => {
+    if (isSoundOn) {
+      const audio = new Audio(audio1);
+      audio.play();
+    }
+  };
   useEffect(() => {
-    const playSound = () => {
-      if (isSoundOn) {
-        const audio = new Audio(audio1);
-        audio.play();
-      }
-    };
     if (seconds === 0) {
       playSound();
     }
-  }, [seconds]);
+  }, [seconds, isSoundOn]);
 
   const getPercentage = () => {
     return isDragging ? 100 : (seconds / (phase === "work" ? workMaxSeconds : breakMaxSeconds)) * 100;
