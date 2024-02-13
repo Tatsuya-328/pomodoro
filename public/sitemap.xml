@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <url>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap>
       <loc>https://pomopro.netlify.app/</loc>
+      <loc>https://pomopro.netlify.app/sitemap_common.xml</loc>
       <lastmod>2024-02-13T04:01:31+00:00</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>1.0</priority>
-   </url>
-</urlset>
+</sitemap>
+</sitemapindex>
